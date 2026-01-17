@@ -1,127 +1,187 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IELTS Computer-Based Mock Test</title>
-  <style>
-    body { font-family: Arial, sans-serif; background:#eef2f7; margin:0; }
-    header { background:#1f2937; color:#fff; padding:12px 24px; display:flex; justify-content:space-between; align-items:center; }
-    header h1 { font-size:18px; margin:0; }
-    .timer { font-size:18px; font-weight:bold; }
-    .tabs { background:#374151; padding:8px 24px; display:flex; }
-    .tabs button { margin-right:10px; padding:6px 14px; background:#9ca3af; border:none; border-radius:4px; cursor:pointer; color:#fff; }
-    .tabs button.active { background:#2563eb; }
-    .layout { display:flex; height:calc(100vh - 96px); }
-    .passage, .questions { width:50%; padding:20px; overflow-y:auto; }
-    .passage { background:#ffffff; border-right:1px solid #ddd; }
-    .questions { background:#f9fafb; }
-    .question { margin-bottom:18px; }
-    .question p { font-weight:bold; }
-    input[type=text], textarea { padding:6px; width:100%; }
-    label { display:block; margin-left:10px; }
-    button.submit { padding:10px 18px; font-size:16px; background:#2563eb; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-top:10px; }
-    .result { display:none; background:#ecfeff; padding:15px; margin-top:20px; border-radius:6px; }
-    .diagram { max-width:100%; height:auto; margin-bottom:10px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IELTS Computer-Based Mock Test</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#eef2f7; margin:0; }
+  header { background:#1f2937; color:#fff; padding:12px 24px; display:flex; justify-content:space-between; align-items:center; }
+  header h1 { font-size:18px; margin:0; }
+  .timer { font-size:18px; font-weight:bold; }
+  .tabs, .reading-nav { background:#374151; padding:8px 24px; display:flex; }
+  .tabs button, .reading-nav button { margin-right:10px; padding:6px 14px; background:#9ca3af; border:none; border-radius:4px; cursor:pointer; color:#fff; }
+  .tabs button.active, .reading-nav button.active { background:#2563eb; }
+  .layout { display:flex; height:calc(100vh - 120px); } /* adjust for reading-nav */
+  .passage, .questions { width:50%; padding:20px; overflow-y:auto; min-height:100%; }
+  .passage { background:#fff; border-right:1px solid #ddd; }
+  .questions { background:#f9fafb; }
+  .question { margin-bottom:18px; }
+  .question p { font-weight:bold; }
+  input[type=text], textarea { padding:6px; width:100%; }
+  label { display:block; margin-left:10px; }
+  button.submit { padding:10px 18px; font-size:16px; background:#2563eb; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-top:10px; }
+  .result { display:block; background:#ecfeff; padding:15px; margin-top:20px; border-radius:6px; }
+  .diagram { max-width:100%; height:auto; margin-bottom:10px; }
+</style>
 </head>
-<body><header>
+<body>
+
+<header>
   <h1>IELTS Computer-Based Mock Test</h1>
   <div class="timer" id="timer">60:00</div>
-</header><div class="tabs">
+</header>
+
+<div class="tabs">
   <button id="tabListening" class="active" onclick="showModule('Listening')">Listening</button>
   <button id="tabReading" onclick="showModule('Reading')">Reading</button>
   <button id="tabWriting" onclick="showModule('Writing')">Writing</button>
-</div><div id="testContainer">
+</div>
+
+<!-- Reading internal navigation -->
+<div id="readingNav" class="reading-nav" style="display:none;">
+  <button id="pass1Btn" class="active" onclick="showPassage(1)">Passage 1</button>
+  <button id="pass2Btn" onclick="showPassage(2)">Passage 2</button>
+  <button id="pass3Btn" onclick="showPassage(3)">Passage 3</button>
+</div>
+
+<div id="testContainer">
   <div class="layout" id="mockLayout">
     <div class="passage" id="passage"></div>
     <div class="questions" id="questions"></div>
   </div>
-</div><script>
-let currentModule = 'Listening';
+</div>
 
-// --- Reading Passages & Questions (Cambridge-style demo) ---
+<script>
+let currentModule = 'Listening';
+let currentReading = 1;
+let time = 3600;
+const timerEl = document.getElementById('timer');
+setInterval(()=>{
+  let m=Math.floor(time/60), s=time%60;
+  timerEl.textContent = `${m}:${s<10?'0':''}${s}`;
+  if(time>0) time--;
+},1000);
+
+// --- Reading Passages & Questions (full 40 Qs) ---
 const passages = {
-  1: {
-    text: `<h2>Passage 1</h2>
-<p>Many people assume that libraries are just places with books and quiet study areas. In fact, libraries are rapidly changing with the introduction of digital services, online databases, and community programs.</p>` ,
-    questions: `
-      <h2>Questions 1–5 (TRUE / FALSE / NOT GIVEN)</h2>
-      <div class='question'><p>1. Libraries only provide books and study spaces.</p><input type='text' name='q1'></div>
-      <div class='question'><p>2. Libraries now include online databases.</p><input type='text' name='q2'></div>
-      <div class='question'><p>3. Community programs are offered in some libraries.</p><input type='text' name='q3'></div>
-      <div class='question'><p>4. Libraries have no digital services.</p><input type='text' name='q4'></div>
-      <div class='question'><p>5. Library users have declined recently.</p><input type='text' name='q5'></div>
-    `
-  },
-  2: {
-    text: `<h2>Passage 2</h2>
-<p>Sleep is essential for maintaining good health. Modern lifestyles, including excessive screen use and irregular work hours, have contributed to widespread sleep deprivation, affecting both physical and mental wellbeing.</p>` ,
-    questions: `
-      <h2>Questions 6–10</h2>
-      <h3>Multiple Choice</h3>
-      <div class='question'><p>6. Which factor contributes to sleep deprivation?</p>
-        <label><input type='radio' name='q6' value='A'> Physical exercise</label>
-        <label><input type='radio' name='q6' value='B'> Screen use</label>
-        <label><input type='radio' name='q6' value='C'> Healthy diet</label>
-      </div>
-      <h3>Sentence Completion</h3>
-      <div class='question'><p>7. Sleep is essential for regulating __________.</p><input type='text' name='q7'></div>
-      <h3>Yes / No / Not Given</h3>
-      <div class='question'><p>8. Everyone understands the importance of sleep.</p><input type='text' name='q8'></div>
-      <div class='question'><p>9. Sleep deprivation affects mental health.</p><input type='text' name='q9'></div>
-      <div class='question'><p>10. Irregular work hours do not affect sleep.</p><input type='text' name='q10'></div>
-    `
-  },
-  3: {
-    text: `<h2>Passage 3</h2>
-<p>Scientific research often faces challenges due to bias, selective reporting, and small sample sizes. Ensuring transparency and sharing data openly are crucial for reliability and trustworthiness.</p>` ,
-    questions: `
-      <h2>Questions 11–15</h2>
-      <h3>Matching Headings</h3>
-      <div class='question'><p>11. Paragraph A</p><input type='text' name='q11'></div>
-      <div class='question'><p>12. Paragraph B</p><input type='text' name='q12'></div>
-      <h3>Summary Completion</h3>
-      <div class='question'><p>13. Bias can distort the scientific __________.</p><input type='text' name='q13'></div>
-      <div class='question'><p>14. Small samples reduce __________.</p><input type='text' name='q14'></div>
-      <div class='question'><p>15. Open data improves research __________.</p><input type='text' name='q15'></div>
-    `
-  }
+  1: { text:`<h2>Passage 1: Public Libraries</h2><p>Public libraries have evolved from simple book repositories to modern learning hubs. They now include digital resources, online databases, and community programs, attracting diverse groups of people.</p>`,
+       questions:`<h2>Questions 1–13</h2>
+<div class='question'><p>1. Libraries only provide books and study spaces.</p><input type='text' name='q1'></div>
+<div class='question'><p>2. Digital resources are now part of many libraries.</p><input type='text' name='q2'></div>
+<div class='question'><p>3. Community programs are offered in some libraries.</p><input type='text' name='q3'></div>
+<div class='question'><p>4. All people visit libraries frequently.</p><input type='text' name='q4'></div>
+<div class='question'><p>5. Some libraries provide computer access.</p><input type='text' name='q5'></div>
+<div class='question'><p>6. Paragraph A heading</p><input type='text' name='q6'></div>
+<div class='question'><p>7. Paragraph B heading</p><input type='text' name='q7'></div>
+<div class='question'><p>8. Paragraph C heading</p><input type='text' name='q8'></div>
+<div class='question'><p>9. Libraries are adapting to modern times.</p><input type='text' name='q9'></div>
+<div class='question'><p>10. Everyone agrees libraries are necessary.</p><input type='text' name='q10'></div>
+<div class='question'><p>11. Libraries’ digital sections are free of charge.</p><input type='text' name='q11'></div>
+<div class='question'><p>12. Libraries have online catalogs.</p><input type='text' name='q12'></div>
+<div class='question'><p>13. All public libraries are identical.</p><input type='text' name='q13'></div>` },
+  2: { text:`<h2>Passage 2: Sleep Deprivation</h2><p>Sleep deprivation is a growing problem worldwide. It affects physical and mental health and is influenced by screen exposure, irregular work hours, and lifestyle choices.</p>`,
+       questions:`<h2>Questions 14–27</h2>
+<div class='question'><p>14. Which factor contributes to sleep deprivation?</p>
+<label><input type='radio' name='q14' value='A'> Balanced diet</label>
+<label><input type='radio' name='q14' value='B'> Screen exposure</label>
+<label><input type='radio' name='q14' value='C'> Regular exercise</label>
+</div>
+<div class='question'><p>15. Sleep regulates __________.</p><input type='text' name='q15'></div>
+<div class='question'><p>16. Everyone understands sleep deprivation.</p><input type='text' name='q16'></div>
+<div class='question'><p>17. Sleep deprivation affects mental health.</p><input type='text' name='q17'></div>
+<div class='question'><p>18. Irregular work hours do not affect sleep.</p><input type='text' name='q18'></div>
+<div class='question'><p>19. Paragraph D heading</p><input type='text' name='q19'></div>
+<div class='question'><p>20. Paragraph E heading</p><input type='text' name='q20'></div>
+<div class='question'><p>21. Paragraph F heading</p><input type='text' name='q21'></div>
+<div class='question'><p>22. A lifestyle choice affecting sleep?</p><input type='text' name='q22'></div>
+<div class='question'><p>23. Screens before bed influence sleep patterns.</p><input type='text' name='q23'></div>
+<div class='question'><p>24. Short naps improve sleep quality.</p><input type='text' name='q24'></div>
+<div class='question'><p>25. Blue light exposure affects melatonin.</p><input type='text' name='q25'></div>
+<div class='question'><p>26. Adults require 7–9 hours of sleep.</p><input type='text' name='q26'></div>
+<div class='question'><p>27. Sleep deprivation can cause physical illness.</p><input type='text' name='q27'></div>` },
+  3: { text:`<h2>Passage 3: Scientific Research Challenges</h2><p>Scientific research faces challenges due to bias, selective reporting, and small sample sizes. Open data and transparency are crucial for improving reliability and trustworthiness in studies.</p>`,
+       questions:`<h2>Questions 28–40</h2>
+<div class='question'><p>28. Paragraph G heading</p><input type='text' name='q28'></div>
+<div class='question'><p>29. Paragraph H heading</p><input type='text' name='q29'></div>
+<div class='question'><p>30. Paragraph I heading</p><input type='text' name='q30'></div>
+<div class='question'><p>31. Bias can distort the scientific __________.</p><input type='text' name='q31'></div>
+<div class='question'><p>32. Small sample sizes reduce __________.</p><input type='text' name='q32'></div>
+<div class='question'><p>33. Open data improves research __________.</p><input type='text' name='q33'></div>
+<div class='question'><p>34. Selective reporting affects __________.</p><input type='text' name='q34'></div>
+<div class='question'><p>35. Researchers should share __________.</p><input type='text' name='q35'></div>
+<div class='question'><p>36. Transparency leads to better __________.</p><input type='text' name='q36'></div>
+<div class='question'><p>37. Trust in science is influenced by __________.</p><input type='text' name='q37'></div>
+<div class='question'><p>38. Paragraph J heading</p><input type='text' name='q38'></div>
+<div class='question'><p>39. Paragraph K heading</p><input type='text' name='q39'></div>
+<div class='question'><p>40. Paragraph L heading</p><input type='text' name='q40'></div>` }
 };
 
 const answers = {
-  q1:'FALSE', q2:'TRUE', q3:'TRUE', q4:'FALSE', q5:'FALSE',
-  q6:'B', q7:'hormones', q8:'NO', q9:'YES', q10:'FALSE',
-  q11:'ii', q12:'iii', q13:'accuracy', q14:'reliability', q15:'transparency'
+q1:'FALSE',q2:'TRUE',q3:'TRUE',q4:'FALSE',q5:'TRUE',q6:'Community',q7:'Digital',q8:'Introduction',q9:'TRUE',q10:'FALSE',q11:'TRUE',q12:'TRUE',q13:'FALSE',
+q14:'B',q15:'hormones',q16:'NO',q17:'YES',q18:'FALSE',q19:'D',q20:'E',q21:'F',q22:'Exercise',q23:'TRUE',q24:'TRUE',q25:'TRUE',q26:'TRUE',q27:'TRUE',
+q28:'Bias',q29:'Reporting',q30:'Sample',q31:'accuracy',q32:'reliability',q33:'transparency',q34:'results',q35:'data',q36:'reproducibility',q37:'trust',q38:'G',q39:'H',q40:'I'
 };
 
-// --- Writing Diagrams (Demo) ---
+// --- Writing diagrams ---
 const writingDiagrams = ['https://i.imgur.com/FfBvQ7q.png','https://i.imgur.com/abcd123.png','https://i.imgur.com/xyz789.png'];
 function getRandomDiagram(){ return writingDiagrams[Math.floor(Math.random()*writingDiagrams.length)]; }
 
-// --- Module Loader ---
+// --- Show module ---
 function showModule(module){
   currentModule = module;
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab'+module).classList.add('active');
 
   if(module==='Reading'){
-    showPassage(1);
-  } else if(module==='Listening'){
-    document.getElementById('passage').innerHTML = '<h2>Listening Demo</h2><p>This is a demo Listening section. Imagine audio questions here.</p>';
-    document.getElementById('questions').innerHTML = '<p>Type your answers here (demo).</p>';
-  } else if(module==='Writing'){
-    const diagram = getRandomDiagram();
-    document.getElementById('passage').innerHTML = `<h2>Writing Task 1</h2><p>Analyze the diagram below and write a report.</p><img class='diagram' src='${diagram}' alt='Writing Task 1 Diagram'>`;
-    document.getElementById('questions').innerHTML = `<textarea style='height:200px;' placeholder='Write your Task 1 answer here...'></textarea>`;} }
+    document.getElementById('readingNav').style.display='flex';
+    showPassage(currentReading);
+  } else {
+    document.getElementById('readingNav').style.display='none';
+    if(module==='Listening'){
+      document.getElementById('passage').innerHTML = '<h2>Listening Demo</h2><p>This is a demo Listening section. Imagine audio questions here.</p>';
+      document.getElementById('questions').innerHTML = '<p>Type your answers here (demo).</p>';
+    } else if(module==='Writing'){
+      const diagram = getRandomDiagram();
+      document.getElementById('passage').innerHTML = `<h2>Writing Task 1</h2><p>Analyze the diagram below and write a report.</p><img class='diagram' src='${diagram}' alt='Writing Task 1 Diagram'>`;
+      document.getElementById('questions').innerHTML = `<textarea style='height:200px;' placeholder='Write your Task 1 answer here...'></textarea>`;
+    }
+  }
+}
 
-function showPassage(n){ document.getElementById('passage').innerHTML = passages[n].text; document.getElementById('questions').innerHTML = passages[n].questions + <button class='submit' onclick='submitTest()'>Submit Test</button>; }
+// --- Show passage inside Reading ---
+function showPassage(n){
+  currentReading = n;
+  document.getElementById('passage').innerHTML = passages[n].text;
+  document.getElementById('questions').innerHTML = passages[n].questions + `<button class='submit' onclick='submitTest()'>Submit Test</button>`;
+  // Highlight active reading nav
+  document.querySelectorAll('.reading-nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pass'+n+'Btn').classList.add('active');
+}
 
-function submitTest(){ let score=0; for(let q in answers){ const el = document.querySelector([name=${q}]); if(!el) continue; let val = el.type==='radio'? document.querySelector([name=${q}]:checked)?.value : el.value?.trim(); if(val && val.toString().toUpperCase() === answers[q].toString().toUpperCase()) score++; } document.getElementById('questions').innerHTML += <div class='result'>Correct Answers: <strong>${score}/40</strong><br>Estimated Band: <strong>${cambridgeBand(score)}</strong></div>; }
+// --- Submit Reading test ---
+function submitTest(){
+  let score=0;
+  for(let q in answers){
+    const el = document.querySelector(`[name=${q}]`);
+    if(!el) continue;
+    let val = el.type==='radio'? document.querySelector(`[name=${q}]:checked`)?.value : el.value?.trim();
+    if(val && val.toString().toUpperCase()===answers[q].toString().toUpperCase()) score++;
+  }
+  document.getElementById('questions').innerHTML += `<div class='result'>Correct Answers: <strong>${score}/40</strong><br>Estimated Band: <strong>${cambridgeBand(score)}</strong></div>`;
+}
 
-function cambridgeBand(score){ if(score>=39) return '9.0'; if(score>=37) return '8.5'; if(score>=35) return '8.0'; if(score>=33) return '7.5'; if(score>=30) return '7.0'; if(score>=27) return '6.5'; if(score>=23) return '6.0'; if(score>=19) return '5.5'; if(score>=15) return '5.0'; return 'Below 5.0'; }
+function cambridgeBand(score){
+  if(score>=39) return '9.0'; if(score>=37) return '8.5';
+  if(score>=35) return '8.0'; if(score>=33) return '7.5';
+  if(score>=30) return '7.0'; if(score>=27) return '6.5';
+  if(score>=23) return '6.0'; if(score>=19) return '5.5';
+  if(score>=15) return '5.0'; return 'Below 5.0';
+}
 
 // --- Initialize ---
 window.addEventListener('DOMContentLoaded', () => { showModule('Listening'); });
+</script>
 
-</script></body>
+</body>
 </html>
