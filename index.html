@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -25,15 +26,21 @@
     #adminPanel { background:#fff; padding:15px; margin:10px; border-radius:6px; display:none; }
   </style>
 </head>
-<body><header>
+<body>
+
+<header>
   <h1>IELTS Computer-Based Mock Test</h1>
   <div class="timer" id="timer">60:00</div>
-</header><div class="tabs">
+</header>
+
+<div class="tabs">
   <button id="tabReading" class="active" onclick="showModule('Reading')">Reading</button>
   <button id="tabListening" onclick="showModule('Listening')">Listening</button>
   <button id="tabWriting" onclick="showModule('Writing')">Writing</button>
   <button onclick="toggleAdmin()">Admin Panel</button>
-</div><div id="adminPanel">
+</div>
+
+<div id="adminPanel">
   <h3>Add New Reading Test</h3>
   <label>Passage Text:</label>
   <textarea id="newPassage" rows="4"></textarea>
@@ -42,12 +49,16 @@
   <label>Answers JSON:</label>
   <textarea id="newAnswers" rows="4" placeholder='{"q1":"TRUE","q2":"FALSE"}'></textarea>
   <button class="adminAdd" onclick="addNewTest()">Add Test</button>
-</div><div id="testContainer">
+</div>
+
+<div id="testContainer">
   <div class="layout" id="mockLayout">
     <div class="passage" id="passage"></div>
     <div class="questions" id="questions"></div>
   </div>
-</div><script>
+</div>
+
+<script>
 let currentModule = 'Reading';
 let passages = {
   1: {
@@ -83,15 +94,37 @@ function loadModule(module){
   } else if(module==='Writing'){
     const diagram = getRandomDiagram();
     document.getElementById('passage').innerHTML = `<h2>Writing Task 1</h2><p>Analyze the diagram below and write a report.</p><img class='diagram' src='${diagram}' alt='Writing Task 1 Diagram'>`;
-    document.getElementById('questions').innerHTML = `<textarea style='height:200px;' placeholder='Write your Task 1 answer here...'></textarea>`;} }
+    document.getElementById('questions').innerHTML = `<textarea style='height:200px;' placeholder='Write your Task 1 answer here...'></textarea>`;
+  }
+}
 
-function toggleAdmin(){ const panel = document.getElementById('adminPanel'); panel.style.display = panel.style.display==='none' ? 'block' : 'none'; }
+function toggleAdmin(){
+  const panel = document.getElementById('adminPanel');
+  panel.style.display = panel.style.display==='none' ? 'block' : 'none';
+}
 
-function addNewTest(){ const id = Object.keys(passages).length + 1; const passageText = document.getElementById('newPassage').value; const questionsHTML = document.getElementById('newQuestions').value; const answersJSON = JSON.parse(document.getElementById('newAnswers').value); passages[id] = { text: passageText, questions: questionsHTML }; Object.assign(answers, answersJSON); alert('New test added successfully!'); document.getElementById('newPassage').value=''; document.getElementById('newQuestions').value=''; document.getElementById('newAnswers').value=''; }
+function addNewTest(){
+  const id = Object.keys(passages).length + 1;
+  const passageText = document.getElementById('newPassage').value;
+  const questionsHTML = document.getElementById('newQuestions').value;
+  const answersJSON = JSON.parse(document.getElementById('newAnswers').value);
+  passages[id] = { text: passageText, questions: questionsHTML };
+  Object.assign(answers, answersJSON);
+  alert('New test added successfully!');
+  document.getElementById('newPassage').value='';
+  document.getElementById('newQuestions').value='';
+  document.getElementById('newAnswers').value='';
+}
 
-// Writing diagrams const writingDiagrams = ['https://i.imgur.com/FfBvQ7q.png','https://i.imgur.com/abcd123.png','https://i.imgur.com/xyz789.png']; function getRandomDiagram(){ const index = Math.floor(Math.random()*writingDiagrams.length); return writingDiagrams[index]; }
+// Writing diagrams
+const writingDiagrams = ['https://i.imgur.com/FfBvQ7q.png','https://i.imgur.com/abcd123.png','https://i.imgur.com/xyz789.png'];
+function getRandomDiagram(){
+  const index = Math.floor(Math.random()*writingDiagrams.length);
+  return writingDiagrams[index];
+}
 
-showModule('Reading'); </script>
+showModule('Reading');
+</script>
 
 </body>
 </html>
