@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -20,92 +19,108 @@
     .question p { font-weight:bold; }
     input[type=text], textarea { padding:6px; width:100%; }
     label { display:block; margin-left:10px; }
-    button.submit { padding:10px 18px; font-size:16px; background:#2563eb; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+    button.submit { padding:10px 18px; font-size:16px; background:#2563eb; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-top:10px; }
     .result { display:none; background:#ecfeff; padding:15px; margin-top:20px; border-radius:6px; }
     .diagram { max-width:100%; height:auto; margin-bottom:10px; }
   </style>
 </head>
-<body>
-
-<header>
+<body><header>
   <h1>IELTS Computer-Based Mock Test</h1>
   <div class="timer" id="timer">60:00</div>
-</header>
-
-<div class="tabs">
+</header><div class="tabs">
   <button id="tabReading" class="active" onclick="showModule('Reading')">Reading</button>
-  let passages = {
-  1: {
-    text: `<h2>Passage 1</h2><p>Public libraries have traditionally provided books and quiet study spaces...</p>`,
-    questions: `
-      <h2>Questions 1–5 (TRUE / FALSE / NOT GIVEN)</h2>
-      <div class='question'><p>1. Libraries originally provided digital services.</p><input type='text' name='q1'></div>
-      <div class='question'><p>2. Libraries help people without internet access.</p><input type='text' name='q2'></div>
-      ...
-    `
-  }
-};
-  2: {
-  text: `<h2>Passage 2</h2>
-         <p>Sleep is essential for human health. Modern lifestyles and excessive screen use have contributed to widespread sleep deprivation.</p>`,
-  questions: `
-    <h2>Questions 6–10 (TRUE / FALSE / NOT GIVEN)</h2>
-    <div class='question'><p>6. Sleep helps regulate hormones.</p><input type='text' name='q6'></div>
-    <div class='question'><p>7. Everyone understands sleep deprivation.</p><input type='text' name='q7'></div>
-    <div class='question'><p>8. Sleep loss is considered a social issue.</p><input type='text' name='q8'></div>
-    <div class='question'><p>9. Modern lifestyle increases sleep deprivation.</p><input type='text' name='q9'></div>
-    <div class='question'><p>10. Screens are unrelated to sleep issues.</p><input type='text' name='q10'></div>
-  `
-}
   <button id="tabListening" onclick="showModule('Listening')">Listening</button>
   <button id="tabWriting" onclick="showModule('Writing')">Writing</button>
-</div>
-
-<div id="testContainer">
+</div><div id="testContainer">
   <div class="layout" id="mockLayout">
     <div class="passage" id="passage"></div>
     <div class="questions" id="questions"></div>
   </div>
-</div>
-
-<script>
+</div><script>
 let currentModule = 'Reading';
 
-const writingDiagrams = [
-  'https://i.imgur.com/FfBvQ7q.png',
-  'https://i.imgur.com/abcd123.png',
-  'https://i.imgur.com/xyz789.png'
-];
-
-function getRandomDiagram(){
-  const index = Math.floor(Math.random()*writingDiagrams.length);
-  return writingDiagrams[index];
-}
-
-function showModule(module){
-  currentModule = module;
-  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab'+module).classList.add('active');
-  loadModule(module);
-}
-
-function loadModule(module){
-  if(module==='Reading'){
-    document.getElementById('passage').innerHTML = passages[1].text;
-    document.getElementById('questions').innerHTML = passages[1].questions;
-  } else if(module==='Listening'){
-    document.getElementById('passage').innerHTML = '<h2>Listening Module</h2><p>Audio-based questions will appear here.</p>';
-    document.getElementById('questions').innerHTML = '<p>Type your answers here.</p>';
-  } else if(module==='Writing'){
-    const diagram = getRandomDiagram();
-    document.getElementById('passage').innerHTML = `<h2>Writing Task 1</h2><p>Analyze the diagram below and write a report.</p><img class='diagram' src='${diagram}' alt='Writing Task 1 Diagram'>`;
-    document.getElementById('questions').innerHTML = `<textarea style='height:200px;' placeholder='Write your Task 1 answer here...'></textarea>`;
+// --- Copy-Paste Ready Reading Passages & Questions ---
+const passages = {
+  1: {
+    text: `<h2>Passage 1</h2><p>Public libraries have traditionally provided books and quiet study spaces. Today, many libraries offer digital services, including computers and internet access.</p>` ,
+    questions: `
+      <h2>Questions 1–5 (TRUE / FALSE / NOT GIVEN)</h2>
+      <div class='question'><p>1. Libraries originally provided digital services.</p><input type='text' name='q1'></div>
+      <div class='question'><p>2. Libraries help people without internet access.</p><input type='text' name='q2'></div>
+      <div class='question'><p>3. All critics believe libraries are unnecessary.</p><input type='text' name='q3'></div>
+      <div class='question'><p>4. Library use has completely declined.</p><input type='text' name='q4'></div>
+      <div class='question'><p>5. Libraries are adapting to change.</p><input type='text' name='q5'></div>
+    `
+  },
+  2: {
+    text: `<h2>Passage 2</h2><p>Sleep is essential for human health. Modern lifestyles and excessive screen use have contributed to widespread sleep deprivation.</p>` ,
+    questions: `
+      <h2>Questions 6–10</h2>
+      <h3>Multiple Choice</h3>
+      <div class='question'><p>6. What is a cause of sleep deprivation?</p>
+        <label><input type='radio' name='q6' value='A'> Physical exercise</label>
+        <label><input type='radio' name='q6' value='B'> Screen exposure</label>
+        <label><input type='radio' name='q6' value='C'> Balanced diet</label>
+      </div>
+      <h3>Sentence Completion</h3>
+      <div class='question'><p>7. Sleep helps regulate __________.</p><input type='text' name='q7'></div>
+      <h3>Matching Information</h3>
+      <div class='question'><p>8. Screen use affects sleep patterns.</p><input type='text' name='q8' placeholder='Paragraph'></div>
+      <h3>YES / NO / NOT GIVEN</h3>
+      <div class='question'><p>9. Everyone understands sleep deprivation.</p><input type='text' name='q9'></div>
+      <div class='question'><p>10. Sleep loss is considered a social issue.</p><input type='text' name='q10'></div>
+    `
+  },
+  3: {
+    text: `<h2>Passage 3</h2><p>Scientific research sometimes faces reliability issues due to bias, small sample sizes, and selective reporting.</p>` ,
+    questions: `
+      <h2>Questions 11–15</h2>
+      <h3>Matching Headings</h3>
+      <div class='question'><p>11. Paragraph A</p><input type='text' name='q11'></div>
+      <div class='question'><p>12. Paragraph B</p><input type='text' name='q12'></div>
+      <h3>Summary Completion</h3>
+      <div class='question'><p>13. Research bias can distort the scientific __________.</p><input type='text' name='q13'></div>
+      <div class='question'><p>14. Small sample sizes reduce __________.</p><input type='text' name='q14'></div>
+      <div class='question'><p>15. Open data improves research __________.</p><input type='text' name='q15'></div>
+    `
   }
+};
+
+const answers = {
+  q1:'FALSE', q2:'TRUE', q3:'FALSE', q4:'FALSE', q5:'TRUE',
+  q6:'B', q7:'hormones', q8:'B', q9:'NO', q10:'YES',
+  q11:'ii', q12:'iv', q13:'record', q14:'reliability', q15:'transparency'
+};
+
+// --- Function to show passage ---
+function showPassage(n){
+  document.getElementById('passage').innerHTML = passages[n].text;
+  document.getElementById('questions').innerHTML = passages[n].questions;
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tabReading').classList.add('active');
 }
 
-// Initial load
-showModule('Reading');
-</script>
+// --- Function to submit answers ---
+function submitTest(){
+  let score=0;
+  for(let q in answers){
+    const el = document.querySelector(`[name=${q}]`);
+    if(!el) continue;
+    let val = el.type==='radio'? document.querySelector(`[name=${q}]:checked`)?.value : el.value?.trim();
+    if(val && val.toString().toUpperCase() === answers[q].toString().toUpperCase()) score++;
+  }
+  const r = document.getElementById('questions');
+  r.innerHTML += `<div class='result'>Correct Answers: <strong>${score}/40</strong><br>Estimated Band: <strong>${cambridgeBand(score)}</strong></div>`;
+}
 
-</body>
+function cambridgeBand(score){
+  if(score>=39) return '9.0'; if(score>=37) return '8.5';
+  if(score>=35) return '8.0'; if(score>=33) return '7.5';
+  if(score>=30) return '7.0'; if(score>=27) return '6.5';
+  if(score>=23) return '6.0'; if(score>=19) return '5.5';
+  if(score>=15) return '5.0'; return 'Below 5.0';
+}
+
+showPassage(1);
+</script></body>
 </html>
