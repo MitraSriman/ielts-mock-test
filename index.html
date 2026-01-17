@@ -1,0 +1,97 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IELTS Computer-Based Mock Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#eef2f7; margin:0; }
+    header { background:#1f2937; color:#fff; padding:12px 24px; display:flex; justify-content:space-between; align-items:center; }
+    header h1 { font-size:18px; margin:0; }
+    .timer { font-size:18px; font-weight:bold; }
+    .tabs { background:#374151; padding:8px 24px; display:flex; }
+    .tabs button { margin-right:10px; padding:6px 14px; background:#9ca3af; border:none; border-radius:4px; cursor:pointer; color:#fff; }
+    .tabs button.active { background:#2563eb; }
+    .layout { display:flex; height:calc(100vh - 96px); }
+    .passage, .questions { width:50%; padding:20px; overflow-y:auto; }
+    .passage { background:#ffffff; border-right:1px solid #ddd; }
+    .questions { background:#f9fafb; }
+    .question { margin-bottom:18px; }
+    .question p { font-weight:bold; }
+    input[type=text], textarea { padding:6px; width:100%; }
+    label { display:block; margin-left:10px; }
+    button.submit, button.adminAdd { padding:10px 18px; font-size:16px; background:#2563eb; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-top:10px; }
+    .result { display:none; background:#ecfeff; padding:15px; margin-top:20px; border-radius:6px; }
+    .diagram { max-width:100%; height:auto; margin-bottom:10px; }
+    #adminPanel { background:#fff; padding:15px; margin:10px; border-radius:6px; display:none; }
+  </style>
+</head>
+<body><header>
+  <h1>IELTS Computer-Based Mock Test</h1>
+  <div class="timer" id="timer">60:00</div>
+</header><div class="tabs">
+  <button id="tabReading" class="active" onclick="showModule('Reading')">Reading</button>
+  <button id="tabListening" onclick="showModule('Listening')">Listening</button>
+  <button id="tabWriting" onclick="showModule('Writing')">Writing</button>
+  <button onclick="toggleAdmin()">Admin Panel</button>
+</div><div id="adminPanel">
+  <h3>Add New Reading Test</h3>
+  <label>Passage Text:</label>
+  <textarea id="newPassage" rows="4"></textarea>
+  <label>Questions HTML:</label>
+  <textarea id="newQuestions" rows="6"></textarea>
+  <label>Answers JSON:</label>
+  <textarea id="newAnswers" rows="4" placeholder='{"q1":"TRUE","q2":"FALSE"}'></textarea>
+  <button class="adminAdd" onclick="addNewTest()">Add Test</button>
+</div><div id="testContainer">
+  <div class="layout" id="mockLayout">
+    <div class="passage" id="passage"></div>
+    <div class="questions" id="questions"></div>
+  </div>
+</div><script>
+let currentModule = 'Reading';
+let passages = {
+  1: {
+    text: `<h2>Passage 1</h2><p>Public libraries have traditionally provided books and quiet study spaces. Today, many libraries offer digital services, including computers and internet access.</p>`,
+    questions: `
+      <h2>Questions 1–5 (TRUE / FALSE / NOT GIVEN)</h2>
+      <div class='question'><p>1. Libraries originally provided digital services.</p><input type='text' name='q1'></div>
+      <div class='question'><p>2. Libraries help people without internet access.</p><input type='text' name='q2'></div>
+      <div class='question'><p>3. All critics believe libraries are unnecessary.</p><input type='text' name='q3'></div>
+      <div class='question'><p>4. Library use has completely declined.</p><input type='text' name='q4'></div>
+      <div class='question'><p>5. Libraries are adapting to change.</p><input type='text' name='q5'></div>
+    `
+  }
+};
+let answers = {
+  q1:'FALSE', q2:'TRUE', q3:'FALSE', q4:'FALSE', q5:'TRUE'
+};
+
+function showModule(module){
+  currentModule = module;
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab'+module).classList.add('active');
+  loadModule(module);
+}
+
+function loadModule(module){
+  if(module==='Reading'){
+    document.getElementById('passage').innerHTML = passages[1].text;
+    document.getElementById('questions').innerHTML = passages[1].questions;
+  } else if(module==='Listening'){
+    document.getElementById('passage').innerHTML = '<h2>Listening Module</h2><p>Audio-based questions will appear here.</p>';
+    document.getElementById('questions').innerHTML = '<p>Type your answers here.</p>';
+  } else if(module==='Writing'){
+    const diagram = getRandomDiagram();
+    document.getElementById('passage').innerHTML = `<h2>Writing Task 1</h2><p>Analyze the diagram below and write a report.</p><img class='diagram' src='${diagram}' alt='Writing Task 1 Diagram'>`;
+    document.getElementById('questions').innerHTML = `<textarea style='height:200px;' placeholder='Write your Task 1 answer here...'></textarea>`;} }
+
+function toggleAdmin(){ const panel = document.getElementById('adminPanel'); panel.style.display = panel.style.display==='none' ? 'block' : 'none'; }
+
+function addNewTest(){ const id = Object.keys(passages).length + 1; const passageText = document.getElementById('newPassage').value; const questionsHTML = document.getElementById('newQuestions').value; const answersJSON = JSON.parse(document.getElementById('newAnswers').value); passages[id] = { text: passageText, questions: questionsHTML }; Object.assign(answers, answersJSON); alert('New test added successfully!'); document.getElementById('newPassage').value=''; document.getElementById('newQuestions').value=''; document.getElementById('newAnswers').value=''; }
+
+// Writing diagrams const writingDiagrams = ['https://i.imgur.com/FfBvQ7q.png','https://i.imgur.com/abcd123.png','https://i.imgur.com/xyz789.png']; function getRandomDiagram(){ const index = Math.floor(Math.random()*writingDiagrams.length); return writingDiagrams[index]; }
+
+showModule('Reading'); </script>
+
+</body>
+</html>
