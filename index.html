@@ -9,10 +9,10 @@
   header { background:#1f2937; color:#fff; padding:12px 24px; display:flex; justify-content:space-between; align-items:center; }
   header h1 { font-size:18px; margin:0; }
   .timer { font-size:18px; font-weight:bold; }
-  .tabs, .reading-nav { background:#374151; padding:8px 24px; display:flex; }
-  .tabs button, .reading-nav button { margin-right:10px; padding:6px 14px; background:#9ca3af; border:none; border-radius:4px; cursor:pointer; color:#fff; }
-  .tabs button.active, .reading-nav button.active { background:#2563eb; }
-  .layout { display:flex; height:calc(100vh - 120px); } /* adjust for reading-nav */
+  .tabs, .reading-nav, .listening-nav { background:#374151; padding:8px 24px; display:flex; }
+  .tabs button, .reading-nav button, .listening-nav button { margin-right:10px; padding:6px 14px; background:#9ca3af; border:none; border-radius:4px; cursor:pointer; color:#fff; }
+  .tabs button.active, .reading-nav button.active, .listening-nav button.active { background:#2563eb; }
+  .layout { display:flex; height:calc(100vh - 120px); }
   .passage, .questions { width:50%; padding:20px; overflow-y:auto; min-height:100%; }
   .passage { background:#fff; border-right:1px solid #ddd; }
   .questions { background:#f9fafb; }
@@ -23,6 +23,7 @@
   button.submit { padding:10px 18px; font-size:16px; background:#2563eb; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-top:10px; }
   .result { display:block; background:#ecfeff; padding:15px; margin-top:20px; border-radius:6px; }
   .diagram { max-width:100%; height:auto; margin-bottom:10px; }
+  audio { width:100%; margin-bottom:10px; }
 </style>
 </head>
 <body>
@@ -38,11 +39,19 @@
   <button id="tabWriting" onclick="showModule('Writing')">Writing</button>
 </div>
 
-<!-- Reading internal navigation -->
+<!-- Listening navigation -->
+<div id="listeningNav" class="listening-nav" style="display:none;">
+  <button id="part1Btn" class="active" onclick="showListeningPart(1)">Part 1</button>
+  <button id="part2Btn" onclick="showListeningPart(2)">Part 2</button>
+  <button id="part3Btn" onclick="showListeningPart(3)">Part 3</button>
+  <button id="part4Btn" onclick="showListeningPart(4)">Part 4</button>
+</div>
+
+<!-- Reading navigation -->
 <div id="readingNav" class="reading-nav" style="display:none;">
-  <button id="pass1Btn" class="active" onclick="showPassage(1)">Passage 1</button>
-  <button id="pass2Btn" onclick="showPassage(2)">Passage 2</button>
-  <button id="pass3Btn" onclick="showPassage(3)">Passage 3</button>
+  <button id="pass1Btn" class="active" onclick="showReadingPassage(1)">Passage 1</button>
+  <button id="pass2Btn" onclick="showReadingPassage(2)">Passage 2</button>
+  <button id="pass3Btn" onclick="showReadingPassage(3)">Passage 3</button>
 </div>
 
 <div id="testContainer">
@@ -53,8 +62,10 @@
 </div>
 
 <script>
-let currentModule = 'Listening';
-let currentReading = 1;
+// Timer
+let currentModule='Listening';
+let currentReading=1;
+let currentListening=1;
 let time = 3600;
 const timerEl = document.getElementById('timer');
 setInterval(()=>{
@@ -63,7 +74,20 @@ setInterval(()=>{
   if(time>0) time--;
 },1000);
 
-// --- Reading Passages & Questions (full 40 Qs) ---
+// --- Writing diagrams ---
+const writingDiagrams = ['https://i.imgur.com/FfBvQ7q.png','https://i.imgur.com/abcd123.png','https://i.imgur.com/xyz789.png'];
+function getRandomDiagram(){ return writingDiagrams[Math.floor(Math.random()*writingDiagrams.length)]; }
+
+// --- Listening Parts (demo) ---
+const listeningParts = {
+  1: { audio:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', questions:`<div class='question'><p>Q1. What is the main topic?</p><input type='text' name='lq1'></div>
+<div class='question'><p>Q2. How many people are involved?</p><input type='text' name='lq2'></div>` , answers:{lq1:'Music', lq2:'1'}},
+  2: { audio:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', questions:`<div class='question'><p>Q3. Where is this happening?</p><input type='text' name='lq3'></div>` , answers:{lq3:'Park'}},
+  3: { audio:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', questions:`<div class='question'><p>Q4. Who is speaking?</p><input type='text' name='lq4'></div>` , answers:{lq4:'Teacher'}},
+  4: { audio:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', questions:`<div class='question'><p>Q5. What is being announced?</p><input type='text' name='lq5'></div>` , answers:{lq5:'Meeting'}}
+};
+
+// --- Reading Passages (3 passages, 40 Qs) ---
 const passages = {
   1: { text:`<h2>Passage 1: Public Libraries</h2><p>Public libraries have evolved from simple book repositories to modern learning hubs. They now include digital resources, online databases, and community programs, attracting diverse groups of people.</p>`,
        questions:`<h2>Questions 1–13</h2>
@@ -114,58 +138,71 @@ const passages = {
 <div class='question'><p>37. Trust in science is influenced by __________.</p><input type='text' name='q37'></div>
 <div class='question'><p>38. Paragraph J heading</p><input type='text' name='q38'></div>
 <div class='question'><p>39. Paragraph K heading</p><input type='text' name='q39'></div>
-<div class='question'><p>40. Paragraph L heading</p><input type='text' name='q40'></div>` }
+<div class='question'><p>40. Paragraph L heading</p><input type='text' name='q40'></div>` 
 };
 
-const answers = {
-q1:'FALSE',q2:'TRUE',q3:'TRUE',q4:'FALSE',q5:'TRUE',q6:'Community',q7:'Digital',q8:'Introduction',q9:'TRUE',q10:'FALSE',q11:'TRUE',q12:'TRUE',q13:'FALSE',
+const answers = {q1:'FALSE',q2:'TRUE',q3:'TRUE',q4:'FALSE',q5:'TRUE',q6:'Community',q7:'Digital',q8:'Introduction',q9:'TRUE',q10:'FALSE',q11:'TRUE',q12:'TRUE',q13:'FALSE',
 q14:'B',q15:'hormones',q16:'NO',q17:'YES',q18:'FALSE',q19:'D',q20:'E',q21:'F',q22:'Exercise',q23:'TRUE',q24:'TRUE',q25:'TRUE',q26:'TRUE',q27:'TRUE',
-q28:'Bias',q29:'Reporting',q30:'Sample',q31:'accuracy',q32:'reliability',q33:'transparency',q34:'results',q35:'data',q36:'reproducibility',q37:'trust',q38:'G',q39:'H',q40:'I'
-};
+q28:'Bias',q29:'Reporting',q30:'Sample',q31:'accuracy',q32:'reliability',q33:'transparency',q34:'results',q35:'data',q36:'reproducibility',q37:'trust',q38:'G',q39:'H',q40:'I'};
 
-// --- Writing diagrams ---
-const writingDiagrams = ['https://i.imgur.com/FfBvQ7q.png','https://i.imgur.com/abcd123.png','https://i.imgur.com/xyz789.png'];
-function getRandomDiagram(){ return writingDiagrams[Math.floor(Math.random()*writingDiagrams.length)]; }
-
-// --- Show module ---
+// --- Show Module ---
 function showModule(module){
   currentModule = module;
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab'+module).classList.add('active');
 
-  if(module==='Reading'){
-    document.getElementById('readingNav').style.display='flex';
-    showPassage(currentReading);
-  } else {
+  if(module==='Listening'){
+    document.getElementById('listeningNav').style.display='flex';
     document.getElementById('readingNav').style.display='none';
-    if(module==='Listening'){
-      document.getElementById('passage').innerHTML = '<h2>Listening Demo</h2><p>This is a demo Listening section. Imagine audio questions here.</p>';
-      document.getElementById('questions').innerHTML = '<p>Type your answers here (demo).</p>';
-    } else if(module==='Writing'){
-      const diagram = getRandomDiagram();
-      document.getElementById('passage').innerHTML = `<h2>Writing Task 1</h2><p>Analyze the diagram below and write a report.</p><img class='diagram' src='${diagram}' alt='Writing Task 1 Diagram'>`;
-      document.getElementById('questions').innerHTML = `<textarea style='height:200px;' placeholder='Write your Task 1 answer here...'></textarea>`;
-    }
+    showListeningPart(currentListening);
+  } else if(module==='Reading'){
+    document.getElementById('readingNav').style.display='flex';
+    document.getElementById('listeningNav').style.display='none';
+    showReadingPassage(currentReading);
+  } else if(module==='Writing'){
+    document.getElementById('readingNav').style.display='none';
+    document.getElementById('listeningNav').style.display='none';
+    const diagram = getRandomDiagram();
+    document.getElementById('passage').innerHTML = `<h2>Writing Task 1</h2><p>Analyze the diagram below and write a report.</p><img class='diagram' src='${diagram}' alt='Diagram'>`;
+    document.getElementById('questions').innerHTML = `<textarea style='height:200px;' placeholder='Write your Task 1 answer here...'></textarea>`;
   }
 }
 
-// --- Show passage inside Reading ---
-function showPassage(n){
-  currentReading = n;
+// --- Show Listening Part ---
+function showListeningPart(n){
+  currentListening = n;
+  const part = listeningParts[n];
+  document.getElementById('passage').innerHTML = `<h2>Listening Part ${n}</h2><audio controls src='${part.audio}'></audio>`;
+  document.getElementById('questions').innerHTML = part.questions + `<button class='submit' onclick='submitListening()'>Submit Listening</button>`;
+  document.querySelectorAll('.listening-nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('part'+n+'Btn').classList.add('active');
+}
+
+// --- Submit Listening ---
+function submitListening(){
+  const part = listeningParts[currentListening];
+  let score=0;
+  for(let q in part.answers){
+    const val = document.querySelector(`[name=${q}]`)?.value?.trim();
+    if(val && val.toString().toUpperCase()===part.answers[q].toString().toUpperCase()) score++;
+  }
+  document.getElementById('questions').innerHTML += `<div class='result'>Correct Answers: <strong>${score}</strong></div>`;
+}
+
+// --- Show Reading Passage ---
+function showReadingPassage(n){
+  currentReading=n;
   document.getElementById('passage').innerHTML = passages[n].text;
-  document.getElementById('questions').innerHTML = passages[n].questions + `<button class='submit' onclick='submitTest()'>Submit Test</button>`;
-  // Highlight active reading nav
+  document.getElementById('questions').innerHTML = passages[n].questions + `<button class='submit' onclick='submitReading()'>Submit Reading</button>`;
   document.querySelectorAll('.reading-nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById('pass'+n+'Btn').classList.add('active');
 }
 
-// --- Submit Reading test ---
-function submitTest(){
+// --- Submit Reading ---
+function submitReading(){
   let score=0;
   for(let q in answers){
-    const el = document.querySelector(`[name=${q}]`);
-    if(!el) continue;
-    let val = el.type==='radio'? document.querySelector(`[name=${q}]:checked`)?.value : el.value?.trim();
+    const val = document.querySelector(`[name=${q}]`)?.value?.trim();
     if(val && val.toString().toUpperCase()===answers[q].toString().toUpperCase()) score++;
   }
   document.getElementById('questions').innerHTML += `<div class='result'>Correct Answers: <strong>${score}/40</strong><br>Estimated Band: <strong>${cambridgeBand(score)}</strong></div>`;
@@ -180,7 +217,8 @@ function cambridgeBand(score){
 }
 
 // --- Initialize ---
-window.addEventListener('DOMContentLoaded', () => { showModule('Listening'); });
+window.addEventListener('DOMContentLoaded',()=>{ showModule('Listening'); });
+
 </script>
 
 </body>
