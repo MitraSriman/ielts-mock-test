@@ -28,8 +28,8 @@
   <h1>IELTS Computer-Based Mock Test</h1>
   <div class="timer" id="timer">60:00</div>
 </header><div class="tabs">
-  <button id="tabReading" class="active" onclick="showModule('Reading')">Reading</button>
-  <button id="tabListening" onclick="showModule('Listening')">Listening</button>
+  <button id="tabListening" class="active" onclick="showModule('Listening')">Listening</button>
+  <button id="tabReading" onclick="showModule('Reading')">Reading</button>
   <button id="tabWriting" onclick="showModule('Writing')">Writing</button>
 </div><div id="testContainer">
   <div class="layout" id="mockLayout">
@@ -37,9 +37,9 @@
     <div class="questions" id="questions"></div>
   </div>
 </div><script>
-let currentModule = 'Reading';
+let currentModule = 'Listening';
 
-// --- Copy-Paste Ready Reading Passages & Questions ---
+// --- Reading Passages & Questions ---
 const passages = {
   1: {
     text: `<h2>Passage 1</h2><p>Public libraries have traditionally provided books and quiet study spaces. Today, many libraries offer digital services, including computers and internet access.</p>` ,
@@ -92,35 +92,33 @@ const answers = {
   q11:'ii', q12:'iv', q13:'record', q14:'reliability', q15:'transparency'
 };
 
-// --- Function to show passage ---
-function showPassage(n){
-  document.getElementById('passage').innerHTML = passages[n].text;
-  document.getElementById('questions').innerHTML = passages[n].questions;
+// --- Writing Diagrams ---
+const writingDiagrams = ['https://i.imgur.com/FfBvQ7q.png','https://i.imgur.com/abcd123.png','https://i.imgur.com/xyz789.png'];
+function getRandomDiagram(){ return writingDiagrams[Math.floor(Math.random()*writingDiagrams.length)]; }
+
+// --- Load Module ---
+function showModule(module){
+  currentModule = module;
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tabReading').classList.add('active');
-}
+  document.getElementById('tab'+module).classList.add('active');
 
-// --- Function to submit answers ---
-function submitTest(){
-  let score=0;
-  for(let q in answers){
-    const el = document.querySelector(`[name=${q}]`);
-    if(!el) continue;
-    let val = el.type==='radio'? document.querySelector(`[name=${q}]:checked`)?.value : el.value?.trim();
-    if(val && val.toString().toUpperCase() === answers[q].toString().toUpperCase()) score++;
-  }
-  const r = document.getElementById('questions');
-  r.innerHTML += `<div class='result'>Correct Answers: <strong>${score}/40</strong><br>Estimated Band: <strong>${cambridgeBand(score)}</strong></div>`;
-}
+  if(module==='Reading'){
+    showPassage(1);
+  } else if(module==='Listening'){
+    document.getElementById('passage').innerHTML = '<h2>Listening Module</h2><p>Audio-based questions will appear here.</p>';
+    document.getElementById('questions').innerHTML = '<p>Type your answers here.</p>';
+  } else if(module==='Writing'){
+    const diagram = getRandomDiagram();
+    document.getElementById('passage').innerHTML = `<h2>Writing Task 1</h2><p>Analyze the diagram below and write a report.</p><img class='diagram' src='${diagram}' alt='Writing Task 1 Diagram'>`;
+    document.getElementById('questions').innerHTML = `<textarea style='height:200px;' placeholder='Write your Task 1 answer here...'></textarea>`;} }
 
-function cambridgeBand(score){
-  if(score>=39) return '9.0'; if(score>=37) return '8.5';
-  if(score>=35) return '8.0'; if(score>=33) return '7.5';
-  if(score>=30) return '7.0'; if(score>=27) return '6.5';
-  if(score>=23) return '6.0'; if(score>=19) return '5.5';
-  if(score>=15) return '5.0'; return 'Below 5.0';
-}
+function showPassage(n){ document.getElementById('passage').innerHTML = passages[n].text; document.getElementById('questions').innerHTML = passages[n].questions + <button class='submit' onclick='submitTest()'>Submit Test</button>; }
 
-showPassage(1);
-</script></body>
+function submitTest(){ let score=0; for(let q in answers){ const el = document.querySelector([name=${q}]); if(!el) continue; let val = el.type==='radio'? document.querySelector([name=${q}]:checked)?.value : el.value?.trim(); if(val && val.toString().toUpperCase() === answers[q].toString().toUpperCase()) score++; } document.getElementById('questions').innerHTML += <div class='result'>Correct Answers: <strong>${score}/40</strong><br>Estimated Band: <strong>${cambridgeBand(score)}</strong></div>; }
+
+function cambridgeBand(score){ if(score>=39) return '9.0'; if(score>=37) return '8.5'; if(score>=35) return '8.0'; if(score>=33) return '7.5'; if(score>=30) return '7.0'; if(score>=27) return '6.5'; if(score>=23) return '6.0'; if(score>=19) return '5.5'; if(score>=15) return '5.0'; return 'Below 5.0'; }
+
+// --- Initialize --- showModule('Listening'); </script>
+
+</body>
 </html>
