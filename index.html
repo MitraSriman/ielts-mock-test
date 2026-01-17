@@ -34,6 +34,29 @@
 
 <div class="tabs">
   <button id="tabReading" class="active" onclick="showModule('Reading')">Reading</button>
+  let passages = {
+  1: {
+    text: `<h2>Passage 1</h2><p>Public libraries have traditionally provided books and quiet study spaces...</p>`,
+    questions: `
+      <h2>Questions 1–5 (TRUE / FALSE / NOT GIVEN)</h2>
+      <div class='question'><p>1. Libraries originally provided digital services.</p><input type='text' name='q1'></div>
+      <div class='question'><p>2. Libraries help people without internet access.</p><input type='text' name='q2'></div>
+      ...
+    `
+  }
+};
+  2: {
+  text: `<h2>Passage 2</h2>
+         <p>Sleep is essential for human health. Modern lifestyles and excessive screen use have contributed to widespread sleep deprivation.</p>`,
+  questions: `
+    <h2>Questions 6–10 (TRUE / FALSE / NOT GIVEN)</h2>
+    <div class='question'><p>6. Sleep helps regulate hormones.</p><input type='text' name='q6'></div>
+    <div class='question'><p>7. Everyone understands sleep deprivation.</p><input type='text' name='q7'></div>
+    <div class='question'><p>8. Sleep loss is considered a social issue.</p><input type='text' name='q8'></div>
+    <div class='question'><p>9. Modern lifestyle increases sleep deprivation.</p><input type='text' name='q9'></div>
+    <div class='question'><p>10. Screens are unrelated to sleep issues.</p><input type='text' name='q10'></div>
+  `
+}
   <button id="tabListening" onclick="showModule('Listening')">Listening</button>
   <button id="tabWriting" onclick="showModule('Writing')">Writing</button>
 </div>
